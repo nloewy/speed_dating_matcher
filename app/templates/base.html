@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Mini Amazon</title>
+  <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+  <link href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/external.css') }}">
+  <style>
+    body {
+        font-family: "Lato", sans-serif;
+    }
+
+    .main-head {
+        height: 150px;
+        background: #FBFBFF;
+    }
+
+    .sidenav {
+        height: 100%;
+        background-color: #0D0106;
+        overflow-x: hidden;
+        padding-top: 20px;
+    }
+
+    .main {
+        padding: 0px 10px;
+    }
+
+    .login-main-text {
+        margin-top: 20%;
+        padding: 60px;
+        color: #FBFBFF;
+    }
+
+    .login-main-text h2 {
+        font-weight: 300;
+    }
+
+    .btn-black {
+        background-color: #657ED4 !important;
+        color: #FBFBFF;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidenav">
+    {% block msg %}
+
+      <h1 style="color:#0D0106">Welcome to CompSci 316 Mini Amazon!</h1>
+      <div style="color: #3626A7; text-align: right; margin-bottom: 25px">
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('users.view_user', user_id=current_user.id) }}" type="button" class="btn btn-light">Profile</a> 
+        <a href="{{ url_for('users.logout', next = request.path) }}" type="button" class="btn btn-light">Log out</a>
+        {% else %}
+          <a href="{{ url_for('users.login', next=request.path) }}" type="button" class="btn btn-light">Log in</a>
+        {% endif %}
+      </div>
+    {% endblock %}
+  </div>
+  <div class="main">
+    {% block content %}{% endblock %}
+  </div>
+</body>

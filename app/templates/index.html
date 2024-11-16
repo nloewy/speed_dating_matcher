@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+<h1 style="color:#0D0106">Webapp Flask Template!</h1>
+<h2>All Users:</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">User Ids</th>
+      <th scope="col">First Names</th>
+      <th scope="col">Last Names</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for user in users%}
+      <tr>
+        <th scope="row">{{user.id}}</th>
+        <td>{{user.firstname}}</td>
+        <td>{{user.lastname}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
