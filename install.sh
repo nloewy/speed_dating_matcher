@@ -13,6 +13,23 @@ else
     exit 1
 fi
 
+
+
+# Check if a virtual environment exists
+if [[ ! -d "venv" ]]; then
+    echo "Virtual environment not found. Creating a new one..."
+    python3 -m venv venv
+    echo "Virtual environment created. Please activate it and rerun the script."
+    exit 1
+fi
+
+if [[ -z "$VIRTUAL_ENV" ]]; then
+    echo "Virtual environment not activated. Please activate it with:"
+    echo "source venv/bin/activate"
+    exit 1
+fi
+
+
 # Ensure all the necessary environment variables are set
 if [ -z "$DB_USER" ] || [ -z "$DB_PASSWORD" ] || [ -z "$DB_HOST" ] || [ -z "$DB_PORT" ] || [ -z "$DB_NAME" ] ; then
     echo "One or more required environment variables are missing in .flaskenv."
@@ -22,7 +39,7 @@ fi
 # Generate secret key if not provided
 if ! grep -q "^SECRET_KEY=" .flaskenv; then
     echo "SECRET_KEY not found in .flaskenv. Generating a new one..."
-    SECRET=$(LC_CTYPE=C tr -dc 'a-z0-9' < /dev/urandom | head -c50)
+    SECRET=$(LC_CTYPE=C tr -dc 'a-zA-Z0-9+/=' < /dev/urandom | head -c50 | base64)
     echo "" >> .flaskenv  # Ensure there is a newline
     echo "SECRET_KEY=\"$SECRET\"" >> .flaskenv
     echo "SECRET_KEY=$SECRET written to .flaskenv"
@@ -32,7 +49,7 @@ fi
 
 
 # Export other environment variables
-export FLASK_APP="main.py"
+export FLASK_APP="speed_dating.py"
 export FLASK_DEBUG="True"
 export FLASK_RUN_HOST="0.0.0.0"
 export FLASK_RUN_PORT="8080"

@@ -6,15 +6,16 @@ from .. import login
 
 
 class User(UserMixin):
-    def __init__(self, name, phone, email):
+    def __init__(self, name, phone, email, password):
         self.email = email
         self.name = name
         self.phone = phone
+        self.hashed_password = password
 
     @staticmethod
     def get_by_auth(email, password):
         rows = app.db.execute("""
-            SELECT password_, email, name_
+            SELECT password, email, name
             FROM Users
             WHERE email = :email
             """,
@@ -25,7 +26,7 @@ class User(UserMixin):
             # incorrect password
             return None
         else:
-            return User(*(rows[0][1:]))
+            return 1
 
     @staticmethod
     def email_exists(email):
@@ -41,11 +42,12 @@ class User(UserMixin):
     def register(name, phone, email, password):
         try:
             rows = app.db.execute("""
-                INSERT INTO Users(name_, phone, email, password)
+                INSERT INTO Users(name, phone, email, password)
                 VALUES(:name, :phone, :email, :password)
                 """,
                                   name=name, phone=phone, email=email,
-                                  password=generate_password_hash(password))            id = rows[0][0]
+                                  password=generate_password_hash(password))    
+            return rows    
         except Exception as e:
             # likely email already in use; better error checking and reporting needed;
             # the following simply prints the error to the console:
@@ -67,7 +69,7 @@ class User(UserMixin):
     @login.user_loader
     def get_all():
         rows = app.db.execute("""
-            SELECT name, phone, email
+            SELECT name, phone, email, password
             FROM Users
             """)
-        return User(*(rows[0])) if rows else None
+        return [User(*row) for row in rows] if rows else None

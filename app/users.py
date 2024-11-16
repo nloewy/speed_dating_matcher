@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request
-from werkzeug.urls import url_parse
+from urllib.parse import urlparse
 from flask_login import login_user, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
@@ -13,8 +13,6 @@ bp = Blueprint('users', __name__)
 
 
 class LoginForm(FlaskForm):
-    name = StringField('Full Name', validators=[DataRequired()])
-    phone = StringField("Phone Number", validators=[DataRequired(), Regexp(regex='^[+-]?[0-9]+$')])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Sign In')
@@ -32,9 +30,8 @@ def login():
             return redirect(url_for('users.login'))
         login_user(user)
         next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index.index')
-
+        if not next_page or urlparse(next_page).netloc != '':
+            next_page = url_for('index')
         return redirect(next_page)
     return render_template('login.html', title='Sign In', form=form)
 
