@@ -2,8 +2,8 @@ from flask import render_template, redirect, url_for, flash, request
 from werkzeug.urls import url_parse
 from flask_login import login_user, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import ValidationError, DataRequired, Email, EqualTo
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
+from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Regexp
 
 from .model.user import User
 
@@ -13,9 +13,10 @@ bp = Blueprint('users', __name__)
 
 
 class LoginForm(FlaskForm):
+    name = StringField('Full Name', validators=[DataRequired()])
+    phone = StringField("Phone Number", validators=[DataRequired(), Regexp(regex='^[+-]?[0-9]+$')])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
 
@@ -39,14 +40,26 @@ def login():
 
 
 class RegistrationForm(FlaskForm):
-    firstname = StringField('First Name', validators=[DataRequired()])
-    lastname = StringField('Last Name', validators=[DataRequired()])
+    name = StringField('Full Name', validators=[DataRequired()])
+    phone = StringField("Phone Number", validators=[DataRequired(), Regexp(regex='^[+-]?[0-9]+$')])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(),
                                        EqualTo('password')])
     submit = SubmitField('Register')
+
+    def validate_email(self, email):
+        if User.email_exists(email.data):
+            raise ValidationError('Already a user with this email.')
+
+class CreateGroupForm(FlaskForm):
+    name = StringField('Group Name', validators=[DataRequired()])
+    password = PasswordField('Group Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Group Password', validators=[DataRequired(),
+                                       EqualTo('password')])
+    submit = SubmitField('Create Group')
 
     def validate_email(self, email):
         if User.email_exists(email.data):
@@ -59,10 +72,10 @@ def register():
         return redirect(url_for('index.index'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        if User.register(form.email.data,
-                         form.password.data,
-                         form.firstname.data,
-                         form.lastname.data):
+        if User.register(form.name.data,
+                         form.phone.data,
+                         form.email.data,
+                         form.password.data):
             flash('Congratulations, you are now a registered user!')
             return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)

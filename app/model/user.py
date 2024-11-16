@@ -6,16 +6,15 @@ from .. import login
 
 
 class User(UserMixin):
-    def __init__(self, id, email, firstname, lastname):
-        self.id = id
+    def __init__(self, name, phone, email):
         self.email = email
-        self.firstname = firstname
-        self.lastname = lastname
+        self.name = name
+        self.phone = phone
 
     @staticmethod
     def get_by_auth(email, password):
         rows = app.db.execute("""
-            SELECT password, id, email, firstname, lastname
+            SELECT password_, email, name_
             FROM Users
             WHERE email = :email
             """,
@@ -39,18 +38,14 @@ class User(UserMixin):
         return len(rows) > 0
 
     @staticmethod
-    def register(email, password, firstname, lastname):
+    def register(name, phone, email, password):
         try:
             rows = app.db.execute("""
-                INSERT INTO Users(email, password, firstname, lastname)
-                VALUES(:email, :password, :firstname, :lastname)
-                RETURNING id
+                INSERT INTO Users(name_, phone, email, password)
+                VALUES(:name, :phone, :email, :password)
                 """,
-                                  email=email,
-                                  password=generate_password_hash(password),
-                                  firstname=firstname, lastname=lastname)
-            id = rows[0][0]
-            return User.get(id)
+                                  name=name, phone=phone, email=email,
+                                  password=generate_password_hash(password))            id = rows[0][0]
         except Exception as e:
             # likely email already in use; better error checking and reporting needed;
             # the following simply prints the error to the console:
@@ -59,21 +54,20 @@ class User(UserMixin):
 
     @staticmethod
     @login.user_loader
-    def get(id):
+    def get(email):
         rows = app.db.execute("""
-            SELECT id, email, firstname, lastname
+            SELECT name, phone, email
             FROM Users
-            WHERE id = :id
+            WHERE email = :email
             """,
-                              id=id)
+                              email=email)
         return User(*(rows[0])) if rows else None
 
     @staticmethod
     @login.user_loader
     def get_all():
         rows = app.db.execute("""
-            SELECT id, email, firstname, lastname
+            SELECT name, phone, email
             FROM Users
-            """,
-                              id=id)
+            """)
         return User(*(rows[0])) if rows else None
