@@ -4,13 +4,12 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from .. import login
 
-
 class User(UserMixin):
     def __init__(self, id, name, phone, email):
-        self.id=id
-        self.email = email
+        self.id = id
         self.name = name
         self.phone = phone
+        self.email = email
 
     @staticmethod
     def get_by_auth(email, password):
@@ -19,14 +18,13 @@ class User(UserMixin):
             FROM Users
             WHERE email = :email
             """,
-                              email=email)
+            email=email)
         if not rows:  # email not found
             return None
-        elif not check_password_hash(rows[0][0], password):
-            # incorrect password
+        elif not check_password_hash(rows[0][0], password):  # incorrect password
             return None
         else:
-            return User(rows[0][1:])
+            return User(*rows[0][1:])
 
     @staticmethod
     def email_exists(email):
@@ -35,7 +33,7 @@ class User(UserMixin):
             FROM Users
             WHERE email = :email
             """,
-                              email=email)
+            email=email)
         return len(rows) > 0
 
     @staticmethod
@@ -45,31 +43,30 @@ class User(UserMixin):
                 INSERT INTO Users(name, phone, email, password)
                 VALUES(:name, :phone, :email, :password) RETURNING id
                 """,
-                                  name=name, phone=phone, email=email,
-                                  password=generate_password_hash(password))    
+                name=name, phone=phone, email=email,
+                password=generate_password_hash(password))
             return rows[0][0]
         except Exception as e:
-            # likely email already in use; better error checking and reporting needed;
-            # the following simply prints the error to the console:
-            print(str(e))
+            # likely email already in use
+            print(f"Registration error: {str(e)}")
             return None
 
     @staticmethod
     @login.user_loader
-    def get(email):
+    def get(id):
         rows = app.db.execute("""
             SELECT id, name, phone, email
             FROM Users
-            WHERE email = :email
+            WHERE id = :id
             """,
-                              email=email)
+            id=id)
         return User(*rows[0]) if rows else None
 
     @staticmethod
-    @login.user_loader
     def get_all():
         rows = app.db.execute("""
             SELECT id, name, phone, email
             FROM Users
             """)
-        return [User(*row) for row in rows] if rows else None
+        return [User(*row) for row in rows] if rows else []
+

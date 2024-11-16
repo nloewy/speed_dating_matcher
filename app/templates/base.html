@@ -51,7 +51,6 @@
       <h1 style="color:#0D0106">Welcome to CompSci 316 Mini Amazon!</h1>
       <div style="color: #3626A7; text-align: right; margin-bottom: 25px">
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('users.view_user', user_id=current_user.id) }}" type="button" class="btn btn-light">Profile</a> 
         <a href="{{ url_for('users.logout', next = request.path) }}" type="button" class="btn btn-light">Log out</a>
         {% else %}
           <a href="{{ url_for('users.login', next=request.path) }}" type="button" class="btn btn-light">Log in</a>

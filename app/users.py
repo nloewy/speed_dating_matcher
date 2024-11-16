@@ -15,6 +15,7 @@ bp = Blueprint('users', __name__)
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
 
 
@@ -25,7 +26,6 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         user = User.get_by_auth(form.email.data, form.password.data)
-        print(f"User is {user}")
         if user is None:
             flash('Invalid email or password')
             return redirect(url_for('users.login'))
