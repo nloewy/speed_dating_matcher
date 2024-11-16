@@ -6,16 +6,16 @@ from .. import login
 
 
 class User(UserMixin):
-    def __init__(self, name, phone, email, password):
+    def __init__(self, id, name, phone, email):
+        self.id=id
         self.email = email
         self.name = name
         self.phone = phone
-        self.hashed_password = password
 
     @staticmethod
     def get_by_auth(email, password):
         rows = app.db.execute("""
-            SELECT password, email, name
+            SELECT password, id, name, phone, email
             FROM Users
             WHERE email = :email
             """,
@@ -26,7 +26,7 @@ class User(UserMixin):
             # incorrect password
             return None
         else:
-            return 1
+            return User(rows[0][1:])
 
     @staticmethod
     def email_exists(email):
@@ -43,11 +43,11 @@ class User(UserMixin):
         try:
             rows = app.db.execute("""
                 INSERT INTO Users(name, phone, email, password)
-                VALUES(:name, :phone, :email, :password)
+                VALUES(:name, :phone, :email, :password) RETURNING id
                 """,
                                   name=name, phone=phone, email=email,
                                   password=generate_password_hash(password))    
-            return rows    
+            return rows[0][0]
         except Exception as e:
             # likely email already in use; better error checking and reporting needed;
             # the following simply prints the error to the console:
@@ -58,18 +58,18 @@ class User(UserMixin):
     @login.user_loader
     def get(email):
         rows = app.db.execute("""
-            SELECT name, phone, email
+            SELECT id, name, phone, email
             FROM Users
             WHERE email = :email
             """,
                               email=email)
-        return User(*(rows[0])) if rows else None
+        return User(*rows[0]) if rows else None
 
     @staticmethod
     @login.user_loader
     def get_all():
         rows = app.db.execute("""
-            SELECT name, phone, email, password
+            SELECT id, name, phone, email
             FROM Users
             """)
         return [User(*row) for row in rows] if rows else None

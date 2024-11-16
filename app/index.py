@@ -10,6 +10,5 @@ from .model.user import User
 @bp.route('/')
 def index():
     # get all available products for sale:
-    print(User.get_all())
     return render_template('index.html',
                            users=User.get_all())
