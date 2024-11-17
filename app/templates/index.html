@@ -17,9 +17,8 @@
     {% if groups %}
     {% for group in groups%}
       <tr>
-        <td scope="row">
-          {{group.name}}</td>
-          <td>{{group.description}}</td>
+        <td><a href="{{ url_for('groups.view_group', group_id=group.id) }}">{{ group.name }}</a></td>
+        <td>{{group.description}}</td>
           <td>{{group.owner}}</td>
       </tr>
     {% endfor %}
@@ -35,6 +34,7 @@
       <th scope="col">User Name</th>
       <th scope="col">User Email</th>
       <th scope="col">User #</th>
+      <th scope="col">User Gender</th>
     </tr>
   </thead>
   {% if users %}
@@ -45,6 +45,7 @@
           {{user.name}}</td>
         <td>{{user.email}}</td>
         <td>{{user.phone}}</td>
+        <td>{{user.gender}}</td>
       </tr>
     {% endfor %}
   </tbody>

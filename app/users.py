@@ -2,7 +2,7 @@ from flask import render_template, redirect, url_for, flash, request
 from urllib.parse import urlparse
 from flask_login import login_user, logout_user, current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField,  SelectField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Regexp
 
 from .model.user import User
@@ -41,6 +41,7 @@ class RegistrationForm(FlaskForm):
     name = StringField('Full Name', validators=[DataRequired()])
     phone = StringField("Phone Number", validators=[DataRequired(), Regexp(regex='^[+-]?[0-9]+$')])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    gender = SelectField("Gender", choices=["M","F"], validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField(
         'Repeat Password', validators=[DataRequired(),
@@ -73,8 +74,8 @@ def register():
         if User.register(form.name.data,
                          form.phone.data,
                          form.email.data,
+                         form.gender.data,
                          form.password.data):
-            flash('Congratulations, you are now a registered user!')
             return redirect(url_for('users.login'))
     return render_template('register.html', title='Register', form=form)
 

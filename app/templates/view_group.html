@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<br><br>
+{% if members %}
+    <h1 style="color:#0D0106">Members of {{group.name}}!</h1>
+    <h2>{{group.description}}</h2>
+    <table class='table table-hover table-bordered container'>
+    <thead class="thead-dark">
+        <tr>
+        <th scope="col">Name</th>
+        <th scope="col">Gender</th>
+        <th scope="col">Email</th>
+        <th scope="col">Phone</th>
+        </tr>
+    </thead>
+    {% if members %}
+    <tbody>
+        {% for user in members%}
+        <tr>
+            <td>{{user.name}}</td>
+            <td>{{user.gender}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.phone}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    {% endif %}
+    </table>
+{% endif %}
+{% if form %}
+    <h1>Enter Password For Group {{group.name}}</h1>
+    <form action="" method="post">
+    {{ form.hidden_tag() }}
+        {{ form.password.label }}<br/>
+        {{ form.password(size=32) }}<br/>
+        {% for error in form.password.errors %}
+        <span style="color: red;">[{{ error }}]</span>
+        {% endfor %}
+    </p>
+    <p>{{ form.submit() }}</p>
+    </form>
+{% endif %}
+
+{% endblock %}
+

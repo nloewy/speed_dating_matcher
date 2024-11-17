@@ -28,6 +28,13 @@
     {% endfor %}
   </p>
   <p>
+    {{ form.gender.label }} (Could be fake email address)<br/>
+    {{ form.gender(size=2) }}<br/>
+    {% for error in form.gender.errors %}
+    <span style="color: red;">[{{ error }}]</span>
+    {% endfor %}
+  </p>
+  <p>
     {{ form.password.label }}<br/>
     {{ form.password(size=32) }}<br/>
     {% for error in form.password.errors %}
