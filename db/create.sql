@@ -7,3 +7,12 @@ CREATE TABLE Users (
     password VARCHAR NOT NULL
 );
 
+
+CREATE TABLE Groups (
+    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR UNIQUE,
+    description VARCHAR,
+    password VARCHAR NOT NULL,
+    owner INT REFERENCES Users(id)
+);
+

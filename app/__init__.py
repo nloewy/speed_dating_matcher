@@ -21,4 +21,7 @@ def create_app():
     from .users import bp as user_bp
     app.register_blueprint(user_bp)
 
+    from .groups import bp as group_bp
+    app.register_blueprint(group_bp)
+
     return app

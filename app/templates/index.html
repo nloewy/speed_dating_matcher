@@ -3,7 +3,31 @@
 {% block content %}
 
 <br><br>
-<h1 style="color:#0D0106">Webapp Flask Template!</h1>
+<h1 style="color:#0D0106">Speed Dating!</h1>
+<h2>All Groups:</h2>
+<table class='table table-hover table-bordered container'>
+  <thead class="thead-dark">
+    <tr>
+      <th scope="col">Group Name</th>
+      <th scope="col">Group Description</th>
+      <th scope="col">Group Owner</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% if groups %}
+    {% for group in groups%}
+      <tr>
+        <td scope="row">
+          {{group.name}}</td>
+          <td>{{group.description}}</td>
+          <td>{{group.owner}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  {% endif %}
+
+</table>
+
 <h2>All Users:</h2>
 <table class='table table-hover table-bordered container'>
   <thead class="thead-dark">
@@ -13,16 +37,19 @@
       <th scope="col">User #</th>
     </tr>
   </thead>
+  {% if users %}
   <tbody>
     {% for user in users%}
       <tr>
-        <th scope="row">
-          {{user.name}}</th>
+        <td scope="row">
+          {{user.name}}</td>
         <td>{{user.email}}</td>
         <td>{{user.phone}}</td>
       </tr>
     {% endfor %}
   </tbody>
+  {% endif %}
+
 </table>
 {% endblock %}
 
