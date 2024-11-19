@@ -8,9 +8,10 @@ bp = Blueprint('index', __name__)
 from .model.user import User
 from .model.group import Group
 
+
 @bp.route('/')
 def index():
     # get all available products for sale:
     return render_template('index.html',
-                           users=User.get_all(), groups=Group.get_all())
+                           users=User.get_all(), groups=Group.get_all_given_user(current_user.id if not current_user.is_anonymous else None))
 

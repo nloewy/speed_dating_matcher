@@ -2,55 +2,73 @@
 
 {% block content %}
 
-<br><br>
-<h1 style="color:#0D0106">Speed Dating!</h1>
-<h2>All Groups:</h2>
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">Group Name</th>
-      <th scope="col">Group Description</th>
-      <th scope="col">Group Owner</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% if groups %}
-    {% for group in groups%}
-      <tr>
-        <td><a href="{{ url_for('groups.view_group', group_id=group.id) }}">{{ group.name }}</a></td>
-        <td>{{group.description}}</td>
-          <td>{{group.owner}}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-  {% endif %}
+<div class="container mt-5">
+    <h1 style="color:#0D0106">Speed Dating!</h1>
 
-</table>
+    <!-- All Groups -->
+    <h2>All Groups:</h2>
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Group Name</th>
+                    <th scope="col">Group Description</th>
+                    <th scope="col">Group Owner</th>
+                    {% if current_user.is_authenticated %}
+                        <th scope="col">Group Access</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if groups %}
+                    {% for group in groups %}
+                        <tr>
+                            <td>{{ group.name }}</td>
+                            <td>{{ group.description }}</td>
+                            <td>{{ group.owner_name }}</td>
+                            {% if current_user.is_authenticated %}
+                                <td>
+                                    {% if group.owner_id == current_user.id %}
+                                        <!-- Owner Actions -->
+                                        <a href="{{ url_for('groups.view_group', group_id=group.id) }}" class="btn btn-info btn-sm mb-1">View Group</a>
+                                        {% if not group.in_group %}
+                                            <form action="{{ url_for('groups.join_group', group_id=group.id) }}" method="POST" class="d-inline">
+                                                <input type="password" name="password" placeholder="Enter Password" required class="form-control mb-1">
+                                                <button type="submit" class="btn btn-primary btn-sm">Join</button>
+                                            </form>
+                                        {% endif %}
+                                          <form action="{{ url_for('groups.view_group', group_id=group.id) }}" method="POST" class="d-inline">
+                                            <button type="submit" name="toggle_likes" class="btn {% if group.submit_likes %}btn-danger{% else %}btn-success{% endif %} btn-sm">
+                                                {% if group.submit_likes %} Disable Likes {% else %} Enable Likes {% endif %}
+                                            </button>
+                                        </form>
+                                        <a href="{{ url_for('groups.generate_matches', group_id=group.id) }}" class="btn btn-warning btn-sm mb-1">Generate Matches and End Liking</a>
+                                    {% elif group.in_group %}
+                                        <!-- Member Actions -->
+                                        <a href="{{ url_for('groups.view_group', group_id=group.id) }}" class="btn btn-info btn-sm mb-1">View Group</a>
+                                        <form action="{{ url_for('groups.leave_group', group_id=group.id) }}" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm mb-1">Leave Group</button>
+                                        </form>
+                                    {% else %}
+                                        <!-- Non-Member Actions -->
+                                        <form action="{{ url_for('groups.join_group', group_id=group.id) }}" method="POST" class="d-inline">
+                                            <input type="password" name="password" placeholder="Enter Password" required class="form-control mb-1">
+                                            <button type="submit" class="btn btn-primary btn-sm">Join</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No groups available</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 
-<h2>All Users:</h2>
-<table class='table table-hover table-bordered container'>
-  <thead class="thead-dark">
-    <tr>
-      <th scope="col">User Name</th>
-      <th scope="col">User Email</th>
-      <th scope="col">User #</th>
-      <th scope="col">User Gender</th>
-    </tr>
-  </thead>
-  {% if users %}
-  <tbody>
-    {% for user in users%}
-      <tr>
-        <td scope="row">
-          {{user.name}}</td>
-        <td>{{user.email}}</td>
-        <td>{{user.phone}}</td>
-        <td>{{user.gender}}</td>
-      </tr>
-    {% endfor %}
-  </tbody>
-  {% endif %}
+</div>
 
-</table>
 {% endblock %}
-

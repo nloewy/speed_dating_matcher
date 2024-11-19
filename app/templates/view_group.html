@@ -3,45 +3,78 @@
 {% block content %}
 
 <br><br>
-{% if members %}
-    <h1 style="color:#0D0106">Members of {{group.name}}!</h1>
-    <h2>{{group.description}}</h2>
-    <table class='table table-hover table-bordered container'>
-    <thead class="thead-dark">
-        <tr>
-        <th scope="col">Name</th>
-        <th scope="col">Gender</th>
-        <th scope="col">Email</th>
-        <th scope="col">Phone</th>
-        </tr>
-    </thead>
-    {% if members %}
-    <tbody>
-        {% for user in members%}
-        <tr>
-            <td>{{user.name}}</td>
-            <td>{{user.gender}}</td>
-            <td>{{user.email}}</td>
-            <td>{{user.phone}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-    {% endif %}
-    </table>
-{% endif %}
-{% if form %}
-    <h1>Enter Password For Group {{group.name}}</h1>
-    <form action="" method="post">
-    {{ form.hidden_tag() }}
-        {{ form.password.label }}<br/>
-        {{ form.password(size=32) }}<br/>
-        {% for error in form.password.errors %}
-        <span style="color: red;">[{{ error }}]</span>
-        {% endfor %}
-    </p>
-    <p>{{ form.submit() }}</p>
+
+<h1 class="text-primary">{{ group.name }}</h1>
+<h2 class="text-muted">{{ group.description }}</h2>
+<hr>
+
+{% if is_owner %}
+    <form method="POST" class="mb-4">
+        <form action="{{ url_for('groups.view_group', group_id=group.id) }}" method="POST" class="d-inline">
+            <button type="submit" name="toggle_likes" class="btn {% if group.submit_likes %}btn-danger{% else %}btn-success{% endif %} btn-sm">
+                {% if group.submit_likes %} Disable Likes {% else %} Enable Likes {% endif %}
+            </button>
+        </form>
+    </form>
+{% else %}
+    <form action="{{ url_for('groups.leave_group', group_id=group.id) }}" method="POST" style="display: inline;">
+        <button type="submit" class="btn btn-danger btn-sm">Leave Group</button>
     </form>
 {% endif %}
 
-{% endblock %}
 
+<!-- Members Table -->
+{% if members and (is_owner or group.submit_likes)%}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Name</th>
+                    <th scope="col">Gender</th>
+                    {% if is_owner %}
+                    <th scope="col">Email</th>
+                    <th scope="col">Phone</th>
+                    {% endif %}
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in members %}
+                    <tr>
+                        <td>{{ user.name }}</td>
+                        <td>{{ user.gender }}</td>
+                        {% if is_owner %}
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.phone }}</td>
+                        {% endif %}
+                        <td>
+                            <!-- Like/Unlike functionality -->
+                            {% if user.id != current_user.id and group.submit_likes %}
+                                <form action="{{ url_for('groups.view_group', group_id=group.id) }}" method="POST" class="d-inline">
+                                    <input type="hidden" name="like_member" value="{{ user.id }}">
+                                    <button type="submit" class="btn {% if user.is_liked %}btn-secondary{% else %}btn-primary{% endif %} btn-sm">
+                                        {% if user.is_liked %} Unlike {% else %} Like {% endif %}
+                                    </button>
+                            </form>
+                             {% endif %}
+                            <!-- Remove Member for Group Owner -->
+                            {% if is_owner and user.id != group.owner_id %}
+                            <form action="{{ url_for('groups.view_group', group_id=group.id) }}" method="POST" class="d-inline">
+                                <input type="hidden" name="remove_member" value="{{ user.id }}">
+                                <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                            </form>
+                            
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% elif not is_owner and not group.submit_likes %}
+    <p>Check back later to view group members and like them.</p>
+{% elif not members %}
+    <p>No members found in this group.</p>
+{% endif %}
+
+{% endblock %}
